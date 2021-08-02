@@ -22,7 +22,7 @@ const createUser = (payload) => {
       updateUserLoggedInstatus(true)
       hideActivityLoader(dispatch)
     }).catch((err) => {
-      console.log('error is', err)
+      ToastAndroid.show(err.message, ToastAndroid.SHORT)
       hideActivityLoader(dispatch)
 
     })
@@ -45,7 +45,15 @@ const createUser = (payload) => {
       updateUserLoggedInstatus(true)
       hideActivityLoader(dispatch)
     }).catch((err) => {
-      console.log('error is', err)
+      let msgToShow = 'No user registered with this mail id. Please register'
+      if(err.code === 'auth/user-not-found') {
+        ToastAndroid.show(msgToShow, ToastAndroid.SHORT)
+      } else if(err.code === 'auth/wrong-password' ){
+        msgToShow = 'The password is invalid or the user does not have a password'
+        ToastAndroid.show(msgToShow, ToastAndroid.SHORT)
+      } else {
+        ToastAndroid.show(err.message, ToastAndroid.SHORT)
+      }
       hideActivityLoader(dispatch)
 
     })
@@ -60,11 +68,13 @@ const createUser = (payload) => {
       LoginManager.logOut()
       const fbData = await LoginManager.logInWithPermissions(['public_profile', 'email'])
       if(fbData.isCancelled) {
+        hideActivityLoader(dispatch)
         return ToastAndroid.show('User cancelled the sign in process', ToastAndroid.SHORT);
 
       }
       const data = await AccessToken.getCurrentAccessToken()
       if (!data) {
+        hideActivityLoader(dispatch)
         return ToastAndroid.show('Something went wrong obtaining access token', ToastAndroid.SHORT);
 
       }
